@@ -10,11 +10,16 @@ from routes import autenticacion_bp
 @autenticacion_bp.route("/login", methods=["GET", "POST"])
 def login():
 
+    # Si ya existe una sesión de administrador,
+    # dirigirlo al dashboard.
     if current_user.is_authenticated:
+
         if current_user.rol == "ADMIN":
             return redirect(url_for("dashboard.index"))
 
-        return redirect("/api/empleados/")
+        # Si tiene una sesión de empleado en el navegador,
+        # cerrarla porque los empleados usan la app Android.
+        logout_user()
 
     if request.method == "POST":
 
@@ -33,12 +38,17 @@ def login():
             flash("Tu cuenta está desactivada.", "error")
             return redirect(url_for("autenticacion.login"))
 
+        # El acceso web es exclusivo para administradores.
+        if usuario_db.rol != "ADMIN":
+            flash(
+                "Los empleados deben ingresar desde la aplicación Android.",
+                "error"
+            )
+            return redirect(url_for("autenticacion.login"))
+
         login_user(usuario_db)
 
-        if usuario_db.rol == "ADMIN":
-            return redirect(url_for("dashboard.index"))
-
-        return redirect("/api/empleados/")
+        return redirect(url_for("dashboard.index"))
 
     return render_template("autenticacion/login.html")
 

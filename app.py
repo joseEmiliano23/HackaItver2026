@@ -1,5 +1,4 @@
-
-from flask import Flask
+from flask import Flask, redirect, url_for
 
 from config import Config
 from extensions import db, login_manager, csrf
@@ -49,6 +48,10 @@ def create_app():
     app.register_blueprint(autenticacion_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(empleados_bp)
+
+    @app.route("/")
+    def inicio():
+        return redirect(url_for("autenticacion.login"))
 
     # Crear tablas
     with app.app_context():
