@@ -1,4 +1,5 @@
 
+
 from flask import (
     render_template,
     abort,
@@ -7,6 +8,7 @@ from flask import (
     url_for,
     flash
 )
+
 from flask_login import login_required, current_user
 
 from extensions import db
@@ -15,7 +17,7 @@ from routes import dashboard_bp
 
 
 def requiere_admin():
-    if current_user.rol != "ADMIN":
+    if not current_user.es_administrador():
         abort(403)
 
 
@@ -36,7 +38,9 @@ def listar_empleados():
 
     empleados = (
         Usuario.query
-        .filter_by(rol="EMPLEADO")
+        .filter(
+            Usuario.rol.in_(["OPERADOR", "JEFE_EMBARQUE"])
+        )
         .order_by(Usuario.nombre.asc())
         .all()
     )
@@ -58,13 +62,22 @@ def crear_empleado():
         nombre = request.form.get("nombre", "").strip()
         usuario = request.form.get("usuario", "").strip()
         password = request.form.get("password", "")
+        rol = request.form.get("rol", "OPERADOR").strip()
 
         if not nombre or not usuario or not password:
             flash("Todos los campos son obligatorios.", "error")
             return redirect(url_for("dashboard.crear_empleado"))
 
+        if len(nombre) > 100 or len(usuario) > 40:
+            flash("El nombre o usuario excede la longitud permitida.", "error")
+            return redirect(url_for("dashboard.crear_empleado"))
+
         if len(password) < 8:
             flash("La contraseña debe tener al menos 8 caracteres.", "error")
+            return redirect(url_for("dashboard.crear_empleado"))
+
+        if rol not in ("OPERADOR", "JEFE_EMBARQUE"):
+            flash("El rol seleccionado no es válido.", "error")
             return redirect(url_for("dashboard.crear_empleado"))
 
         existente = Usuario.query.filter_by(
@@ -78,8 +91,9 @@ def crear_empleado():
         empleado = Usuario(
             nombre=nombre,
             usuario=usuario,
-            rol="EMPLEADO",
-            activo=True
+            rol=rol,
+            id_proveedor=None,
+            id_sucursal=None
         )
 
         empleado.establecer_password(password)
@@ -92,3 +106,4 @@ def crear_empleado():
         return redirect(url_for("dashboard.listar_empleados"))
 
     return render_template("dashboard/nuevo_empleado.html")
+

@@ -30,7 +30,10 @@ def create_app():
 
     @login_manager.user_loader
     def cargar_usuario(user_id):
-        return db.session.get(Usuario, int(user_id))
+        try:
+            return db.session.get(Usuario, int(user_id))
+        except (ValueError, TypeError):
+            return None
 
     # Importar Blueprints
     from routes import (
@@ -52,10 +55,6 @@ def create_app():
     @app.route("/")
     def inicio():
         return redirect(url_for("autenticacion.login"))
-
-    # Crear tablas
-    with app.app_context():
-        db.create_all()
 
     return app
 

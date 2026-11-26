@@ -1,8 +1,19 @@
 
-from flask import render_template, redirect, url_for, request, flash
-from flask_login import login_user, logout_user, login_required, current_user
+from flask import (
+    render_template,
+    redirect,
+    url_for,
+    request,
+    flash
+)
 
-from extensions import db
+from flask_login import (
+    login_user,
+    logout_user,
+    login_required,
+    current_user
+)
+
 from models.usuario import Usuario
 from routes import autenticacion_bp
 
@@ -10,15 +21,10 @@ from routes import autenticacion_bp
 @autenticacion_bp.route("/login", methods=["GET", "POST"])
 def login():
 
-    # Si ya existe una sesión de administrador,
-    # dirigirlo al dashboard.
     if current_user.is_authenticated:
-
-        if current_user.rol == "ADMIN":
+        if current_user.es_administrador():
             return redirect(url_for("dashboard.index"))
 
-        # Si tiene una sesión de empleado en el navegador,
-        # cerrarla porque los empleados usan la app Android.
         logout_user()
 
     if request.method == "POST":
@@ -30,18 +36,19 @@ def login():
             usuario=usuario
         ).first()
 
-        if not usuario_db or not usuario_db.verificar_password(password):
-            flash("Usuario o contraseña incorrectos.", "error")
-            return redirect(url_for("autenticacion.login"))
-
-        if not usuario_db.activo:
-            flash("Tu cuenta está desactivada.", "error")
-            return redirect(url_for("autenticacion.login"))
-
-        # El acceso web es exclusivo para administradores.
-        if usuario_db.rol != "ADMIN":
+        if (
+            not usuario_db
+            or not usuario_db.verificar_password(password)
+        ):
             flash(
-                "Los empleados deben ingresar desde la aplicación Android.",
+                "Usuario o contraseña incorrectos.",
+                "error"
+            )
+            return redirect(url_for("autenticacion.login"))
+
+        if not usuario_db.es_administrador():
+            flash(
+                "Tu cuenta no tiene permiso para acceder al dashboard web.",
                 "error"
             )
             return redirect(url_for("autenticacion.login"))
@@ -59,6 +66,9 @@ def logout():
 
     logout_user()
 
-    flash("Sesión cerrada correctamente.", "success")
+    flash(
+        "Sesión cerrada correctamente.",
+        "success"
+    )
 
     return redirect(url_for("autenticacion.login"))

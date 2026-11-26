@@ -19,5 +19,13 @@
         <button type="submit">Cerrar sesión</button>
     </form>
 
+    <a href="{{ url_for('dashboard.listar_empleados') }}">
+    Gestionar empleados
+</a>
+
+<a href="{{ url_for('dashboard.crear_empleado') }}">
+    Registrar empleado
+</a>
+
 </body>
 </html>

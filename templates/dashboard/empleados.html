@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empleados - Logística Central</title>
+</head>
+<body>
+
+    <h1>Gestión de empleados</h1>
+
+    <a href="{{ url_for('dashboard.index') }}">Volver al dashboard</a>
+
+    <p>
+        <a href="{{ url_for('dashboard.crear_empleado') }}">
+            Registrar nuevo empleado
+        </a>
+    </p>
+
+    {% with mensajes = get_flashed_messages(with_categories=true) %}
+        {% for categoria, mensaje in mensajes %}
+            <p>{{ mensaje }}</p>
+        {% endfor %}
+    {% endwith %}
+
+    <table border="1" cellpadding="8">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Usuario</th>
+                <th>Rol</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for empleado in empleados %}
+                <tr>
+                    <td>{{ empleado.id_usuario }}</td>
+                    <td>{{ empleado.nombre }}</td>
+                    <td>{{ empleado.usuario }}</td>
+                    <td>{{ empleado.rol }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4">Todavía no hay empleados registrados.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>

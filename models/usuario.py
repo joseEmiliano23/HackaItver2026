@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -8,20 +6,12 @@ from extensions import db
 
 class Usuario(UserMixin, db.Model):
 
-    __tablename__ = "usuarios"
+    __tablename__ = "usuario"
 
-    id = db.Column(
-        db.Integer,
-        primary_key=True
-    )
-
-    nombre = db.Column(
-        db.String(120),
-        nullable=False
-    )
+    id_usuario = db.Column(db.Integer, primary_key=True)
 
     usuario = db.Column(
-        db.String(50),
+        db.String(40),
         unique=True,
         nullable=False
     )
@@ -31,42 +21,51 @@ class Usuario(UserMixin, db.Model):
         nullable=False
     )
 
+    nombre = db.Column(
+        db.String(100),
+        nullable=False
+    )
+
     rol = db.Column(
-        db.String(20),
+        db.String(15),
         nullable=False
     )
 
-    activo = db.Column(
-        db.Boolean,
-        default=True,
-        nullable=False
+    id_proveedor = db.Column(
+    db.Integer,
+    nullable=True
     )
 
-    fecha_creacion = db.Column(
-        db.DateTime,
-        default=datetime.utcnow
+    id_sucursal = db.Column(
+           db.Integer,
+            nullable=True
     )
-
     __table_args__ = (
         db.CheckConstraint(
-            "rol IN ('EMPLEADO', 'ADMIN')",
-            name="check_rol"
+            "rol IN ('PROVEEDOR', 'OPERADOR', "
+            "'JEFE_EMBARQUE', 'SUCURSAL', 'GERENCIA')",
+            name="usuario_rol_check"
         ),
     )
 
-    def establecer_password(self, password):
+    # Flask-Login necesita una propiedad llamada id
+    def get_id(self):
+        return str(self.id_usuario)
 
+    def establecer_password(self, password):
         self.password_hash = generate_password_hash(password)
 
     def verificar_password(self, password):
-
         return check_password_hash(
             self.password_hash,
             password
         )
 
+    def es_administrador(self):
+        return self.rol == "GERENCIA"
+
+    def es_empleado(self):
+        return self.rol in ("OPERADOR", "JEFE_EMBARQUE")
+
     def __repr__(self):
-
         return f"<Usuario {self.usuario}>"
-
-
