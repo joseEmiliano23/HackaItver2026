@@ -1,3 +1,4 @@
+
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -8,7 +9,10 @@ class Usuario(UserMixin, db.Model):
 
     __tablename__ = "usuario"
 
-    id_usuario = db.Column(db.Integer, primary_key=True)
+    id_usuario = db.Column(
+        db.Integer,
+        primary_key=True
+    )
 
     usuario = db.Column(
         db.String(40),
@@ -32,14 +36,15 @@ class Usuario(UserMixin, db.Model):
     )
 
     id_proveedor = db.Column(
-    db.Integer,
-    nullable=True
+        db.Integer,
+        nullable=True
     )
 
     id_sucursal = db.Column(
-           db.Integer,
-            nullable=True
+        db.Integer,
+        nullable=True
     )
+
     __table_args__ = (
         db.CheckConstraint(
             "rol IN ('PROVEEDOR', 'OPERADOR', "
@@ -48,7 +53,7 @@ class Usuario(UserMixin, db.Model):
         ),
     )
 
-    # Flask-Login necesita una propiedad llamada id
+    # Flask-Login necesita identificar al usuario mediante su ID.
     def get_id(self):
         return str(self.id_usuario)
 

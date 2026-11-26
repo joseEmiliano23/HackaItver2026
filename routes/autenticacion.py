@@ -22,8 +22,12 @@ from routes import autenticacion_bp
 def login():
 
     if current_user.is_authenticated:
+
         if current_user.es_administrador():
             return redirect(url_for("dashboard.index"))
+
+        if current_user.es_empleado():
+            return redirect("/api/empleados/")
 
         logout_user()
 
@@ -46,16 +50,23 @@ def login():
             )
             return redirect(url_for("autenticacion.login"))
 
-        if not usuario_db.es_administrador():
+        # Validar que el usuario tenga un rol permitido.
+        if not (
+            usuario_db.es_administrador()
+            or usuario_db.es_empleado()
+        ):
             flash(
-                "Tu cuenta no tiene permiso para acceder al dashboard web.",
+                "Tu cuenta no tiene permiso para acceder.",
                 "error"
             )
             return redirect(url_for("autenticacion.login"))
 
         login_user(usuario_db)
 
-        return redirect(url_for("dashboard.index"))
+        if usuario_db.es_administrador():
+            return redirect(url_for("dashboard.index"))
+
+        return redirect("/api/empleados/")
 
     return render_template("autenticacion/login.html")
 

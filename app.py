@@ -1,3 +1,4 @@
+
 from flask import Flask, redirect, url_for
 
 from config import Config
@@ -51,6 +52,10 @@ def create_app():
     app.register_blueprint(autenticacion_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(empleados_bp)
+
+    # Crear tablas
+    with app.app_context():
+        db.create_all()
 
     @app.route("/")
     def inicio():

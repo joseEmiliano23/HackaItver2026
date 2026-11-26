@@ -14,18 +14,24 @@
 
     <p>Has iniciado sesión como administrador.</p>
 
+    <h2>Gestión de empleados</h2>
+
+    <p>
+        <a href="{{ url_for('dashboard.listar_empleados') }}">
+            Gestionar empleados
+        </a>
+    </p>
+
+    <p>
+        <a href="{{ url_for('dashboard.crear_empleado') }}">
+            Registrar empleado
+        </a>
+    </p>
+
     <form method="POST" action="{{ url_for('autenticacion.logout') }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit">Cerrar sesión</button>
     </form>
-
-    <a href="{{ url_for('dashboard.listar_empleados') }}">
-    Gestionar empleados
-</a>
-
-<a href="{{ url_for('dashboard.crear_empleado') }}">
-    Registrar empleado
-</a>
 
 </body>
 </html>
